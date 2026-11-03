@@ -26,6 +26,11 @@ archive:
 .PHONY: archive-deps
 archive-deps:
 	go mod vendor
+	# Drop the import path declaration from the vendored pure-Go SQLite
+	# driver forked off modernc.org/sqlite: module mode ignores it, but
+	# Fedora's %gobuild (GO111MODULE=off) enforces it and fails on the
+	# mismatch between the directory and the declared import path.
+	if [ -d vendor/github.com/glebarez/go-sqlite ]; then sed -i 's| // import "modernc.org/sqlite"||' vendor/github.com/glebarez/go-sqlite/*.go; fi
 	tar --create --bzip2 \
 		--file "$(CURDIR)/rhc-$(VERSION)-vendor.tar.bz2" \
 		--sort name \
